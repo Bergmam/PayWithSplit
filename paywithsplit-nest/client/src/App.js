@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {Elements, StripeProvider} from 'react-stripe-elements';
+import StripeCheckout from 'react-stripe-checkout';
+import CheckoutForm from './CheckoutForm';
+
 
 class App extends Component {
   constructor() {
@@ -21,7 +24,7 @@ class App extends Component {
     return (
       <div>
         {!this.state.clicked ? <BuyButton onClick={this._onButtonClick}/> : null}
-        {this.state.clicked ? <PurchaseForm/> : null}
+        {this.state.clicked ? <Checkout/> : null}
       </div>
     )
   }
@@ -32,19 +35,87 @@ class BuyButton extends Component {
     return (
       <button {...this.props}>
         {
-          "Buy with Split"
+          "Pay with Split"
         }
       </button>
     )
   }
 }
 
-class PurchaseForm extends Component {
+class Checkout extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      amount: 5000
+    }
+  }
+  onToken = (token, addresses) => {
+    console.log("token: ", token)
+    console.log('addresses: ', addresses)
+
+    const body = new FormData();
+
+    body.append("stripeEmail", token.email);
+    body.append("stripeToken", token.id);
+    body.append("stripeTokenType", token.type);
+
+    body.append("stripeBillingName", addresses.billing_name || "");
+    body.append(
+      "stripeBillingAddressLine1",
+      addresses.billing_address_line1 || ""
+    );
+
+    fetch("http://localhost:3001/payments", {
+      method: "POST",
+      body,
+      mode: "cors"
+    })
+    .then(res => {
+      console.log('response received');
+      console.log(res)
+      return res.json();
+    })
+    .then(result => {
+      console.log("result")
+      console.log(result)
+    })
+    .catch(error => {
+      console.log('error')
+      console.error(error, "error in received!")
+    })
+  };
+
+
   render() {
     return (
-      <div {...this.props}> Purchase Form Component</div>
+      <StripeCheckout
+        amount={this.state.amount}
+        billingAddress
+        locale="auto"
+        name="Pay With Split"
+        stripeKey="pk_test_S6PzcbwueVbM4eIDKlQ5FK4200W95kYCLf"
+        token={this.onToken}
+        zipCode
+      />
     )
   }
+  
 }
+
+// class FormComponent extends Component {
+//   render() {
+//     return (
+//       <StripeProvider apiKey="pk_test_S6PzcbwueVbM4eIDKlQ5FK4200W95kYCLf">
+//         <div className="example">
+//           <h1>React Stripe Elements Example</h1>
+//           <Elements>
+//             <CheckoutForm />
+//           </Elements>
+//         </div>
+//       </StripeProvider>
+//     );
+//   }
+// }
+
 
 export default App;
