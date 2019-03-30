@@ -1,7 +1,7 @@
 export class CreatePaymentDTO {
-    readonly id: number;
-    readonly userId: number;
-    readonly amount: number;
-    readonly currency: string;
-    readonly time: number;
+    stripeEmail: string;
+    stripeToken: string;
+    stripeTokenType: string;
+    stripeBillingName: string;
+    stripeBillingAddressLine1: string;
 }

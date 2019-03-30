@@ -1,10 +1,12 @@
-import { Controller, Get, Param, Post, Body, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Delete, Query, Logger, ValidationPipe } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDTO } from './dto/create-payment.dto';
 
 @Controller('payments')
 export class PaymentsController {
     constructor(private paymentsService: PaymentsService) {}
+
+    private readonly logger = new Logger(PaymentsController.name);
 
     @Get()
     async getAllPayments() {
@@ -19,9 +21,12 @@ export class PaymentsController {
     }
 
     @Post()
-    async addPayment(@Body() createPaymentDTO: CreatePaymentDTO) {
-        const payment = await this.paymentsService.addPayment(createPaymentDTO);
-        return payment;
+    async addPayment(@Body() data : CreatePaymentDTO){
+        let stringdata = JSON.stringify(data, null, 2);
+        this.logger.log('recieved post! body: ', stringdata);
+        this.logger.log('recieved post! body type: ', (data instanceof CreatePaymentDTO).toString());
+        const payments = await this.paymentsService.addPayment(data);
+        return payments;
     }
 
     @Delete()

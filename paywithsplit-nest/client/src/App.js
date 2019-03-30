@@ -53,21 +53,18 @@ class Checkout extends Component {
     console.log("token: ", token)
     console.log('addresses: ', addresses)
 
-    const body = new FormData();
-
-    body.append("stripeEmail", token.email);
-    body.append("stripeToken", token.id);
-    body.append("stripeTokenType", token.type);
-
-    body.append("stripeBillingName", addresses.billing_name || "");
-    body.append(
-      "stripeBillingAddressLine1",
-      addresses.billing_address_line1 || ""
-    );
-
+    let body = {}
+    body['stripeEmail'] = token.email;
+    body['stripeToken'] = token.id;
+    body['stripeTokenType'] = token.type;
+    body['stripeBillingName'] = addresses.billing_name || "";
+    body['stripeBillingAddressLine1'] = addresses.billing_address_line1 || "";
+    
+    console.log('body', body)
     fetch("http://localhost:3001/payments", {
       method: "POST",
-      body,
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body),
       mode: "cors"
     })
     .then(res => {

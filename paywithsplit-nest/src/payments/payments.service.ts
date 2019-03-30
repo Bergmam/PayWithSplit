@@ -1,9 +1,10 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, Logger } from '@nestjs/common';
 import { PAYMENTS } from '../fakedb/payments.fakedb';
 
 
 @Injectable()
 export class PaymentsService {
+    private readonly logger = new Logger(PaymentsService.name);
     payments = PAYMENTS;
 
     getAllPayments(): Promise<any>{
@@ -25,6 +26,8 @@ export class PaymentsService {
     }
 
     addPayment(payment): Promise<any>{
+        let paymentJson = JSON.stringify(payment, null, 2)
+        this.logger.log('payment', paymentJson)
         return new Promise(resolve => {
             this.payments.push(payment)
             resolve(this.payments);
@@ -36,7 +39,7 @@ export class PaymentsService {
         return new Promise(resolve => {
             let index = this.payments.findIndex(payment => payment.id === id);
             if (index === -1){
-                throw new  HttpException('No such payment', payment);
+                throw new HttpException('No such payment', payment);
             }
             this.payments.splice(1, index);
             resolve(this.payments);
