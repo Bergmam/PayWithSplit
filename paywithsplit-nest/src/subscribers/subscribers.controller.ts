@@ -1,10 +1,12 @@
-import { Controller, Get, Param, Post, Body, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Delete, Query, Logger} from '@nestjs/common';
 import { SubscribersService } from './subscribers.service';
 import { CreateSubscriberDTO } from './dto/create-subscriber.dto';
 
 @Controller('subscribers')
 export class SubscribersController {
     constructor(private subscriberService: SubscribersService) {}
+
+    private readonly logger = new Logger(SubscribersController.name);
 
     @Get()
     async getAllSubscribers() {
@@ -19,9 +21,11 @@ export class SubscribersController {
     }
 
     @Post()
-    async addPayment(@Body() createPaymentDTO: CreateSubscriberDTO) {
-        const subscriber = await this.subscriberService.addSubscriber(createPaymentDTO);
-        return subscriber;
+    async addPayment(@Body() data: CreateSubscriberDTO) {
+        let stringdata = JSON.stringify(data, null, 2);
+        this.logger.log('subscriber controller recieved post! body: ', stringdata);
+        const subscribers = await this.subscriberService.addSubscriber(data);
+        return subscribers;
     }
 
     @Delete()

@@ -1,16 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
-import {Elements, StripeProvider} from 'react-stripe-elements';
 import StripeCheckout from 'react-stripe-checkout';
-import CheckoutForm from './CheckoutForm';
+const uuidv4 = require('uuid/v4')
 
 
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      clicked : false
-    };
     this._onButtonClick = this._onButtonClick.bind(this);
   } 
 
@@ -23,21 +19,8 @@ class App extends Component {
   render() {
     return (
       <div>
-        {!this.state.clicked ? <BuyButton onClick={this._onButtonClick}/> : null}
-        {this.state.clicked ? <Checkout/> : null}
+        <Checkout/>
       </div>
-    )
-  }
-}
-
-class BuyButton extends Component {
-  render() {
-    return (
-      <button {...this.props}>
-        {
-          "Pay with Split"
-        }
-      </button>
     )
   }
 }
@@ -46,39 +29,77 @@ class Checkout extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      amount: 5000
+      full_amount: 10000,
+      installment_amount: 1000,
+      currency: "SGD"
     }
   }
   onToken = (token, addresses) => {
     console.log("token: ", token)
     console.log('addresses: ', addresses)
 
-    let body = {}
-    body['stripeEmail'] = token.email;
-    body['stripeToken'] = token.id;
-    body['stripeTokenType'] = token.type;
-    body['stripeBillingName'] = addresses.billing_name || "";
-    body['stripeBillingAddressLine1'] = addresses.billing_address_line1 || "";
+    let paymentBody = {};
+    paymentBody['stripeEmail'] = token.email;
+    paymentBody['stripeToken'] = token.id;
+    paymentBody['stripeTokenType'] = token.type;
+    paymentBody['stripeBillingName'] = addresses.billing_name || "";
+    paymentBody['stripeBillingAddressLine1'] = addresses.billing_address_line1 || "";
     
-    console.log('body', body)
+    console.log('paymentBody', paymentBody)
     fetch("http://localhost:3001/payments", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(body),
+      body: JSON.stringify(paymentBody),
       mode: "cors"
     })
     .then(res => {
-      console.log('response received');
+      console.log('payment response:');
       console.log(res)
       return res.json();
     })
     .then(result => {
-      console.log("result")
+      console.log("payment result:")
       console.log(result)
+
+      let subscriberBody = {};
+      
+      let date = new Date(Date.now());
+
+      subscriberBody['id'] = uuidv4();
+      subscriberBody['name'] = addresses['billing_name'];
+      subscriberBody['currency'] = this.state.currency;
+      subscriberBody['amountLeft'] = this.state.full_amount - this.state.installment_amount;
+      subscriberBody['nextPayment'] = date.setMonth(date.getMonth() + 1)
+      subscriberBody['address'] = addresses.billing_address_line1 + " " + 
+        addresses.billing_address_city + ", " + 
+        addresses.billing_address_zip + ", " + 
+        addresses.billing_address_country_code
+
+      console.log('subscriberbody: ', subscriberBody);
+
+      fetch("http://localhost:3001/subscribers", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(subscriberBody),
+        mode: "cors"
+      })
+      .then(res => {
+        console.log('subscriber response:');
+        console.log(res)
+        return res.json();
+      })
+      .then(result => {
+        console.log('subscriber result:');
+        console.log(result)
+      })
+      .catch(error => {
+        console.log('error')
+        console.error(error, "error in received subscriber response!")
+      })
     })
     .catch(error => {
       console.log('error')
-      console.error(error, "error in received!")
+      console.error(error, "error in received payment response!")
     })
   };
 
@@ -86,7 +107,7 @@ class Checkout extends Component {
   render() {
     return (
       <StripeCheckout
-        amount={this.state.amount}
+        amount={this.state.installment_amount}
         billingAddress
         locale="auto"
         name="Pay With Split"
@@ -98,21 +119,5 @@ class Checkout extends Component {
   }
   
 }
-
-// class FormComponent extends Component {
-//   render() {
-//     return (
-//       <StripeProvider apiKey="pk_test_S6PzcbwueVbM4eIDKlQ5FK4200W95kYCLf">
-//         <div className="example">
-//           <h1>React Stripe Elements Example</h1>
-//           <Elements>
-//             <CheckoutForm />
-//           </Elements>
-//         </div>
-//       </StripeProvider>
-//     );
-//   }
-// }
-
 
 export default App;

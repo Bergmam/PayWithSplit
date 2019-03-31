@@ -23,8 +23,7 @@ export class PaymentsController {
     @Post()
     async addPayment(@Body() data : CreatePaymentDTO){
         let stringdata = JSON.stringify(data, null, 2);
-        this.logger.log('recieved post! body: ', stringdata);
-        this.logger.log('recieved post! body type: ', (data instanceof CreatePaymentDTO).toString());
+        this.logger.log('payments recieved post! body: ', stringdata);
         const payments = await this.paymentsService.addPayment(data);
         return payments;
     }
