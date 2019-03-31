@@ -10,7 +10,7 @@ To set up dependencies:
 `client && npm install`
 
 
-To run (from paywithsplit-nest folder):
+To run (from `paywithsplit-nest` folder):
 
 
 `npm start` 
