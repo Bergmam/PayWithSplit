@@ -1,5 +1,5 @@
 export class CreateSubscriberDTO {
-    readonly id: number;
+    readonly id: string;
     readonly name: string;
     readonly amountLeft: number;
     readonly currency: string;

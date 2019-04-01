@@ -31,21 +31,21 @@ class Checkout extends Component {
     this.state = {
       full_amount: 10000,
       installment_amount: 1000,
-      currency: "SGD"
+      currency: "SGD",
+      payment_accepted : false
     }
   }
   onToken = (token, addresses) => {
-    console.log("token: ", token)
-    console.log('addresses: ', addresses)
-
+    let userID = uuidv4();
     let paymentBody = {};
-    paymentBody['stripeEmail'] = token.email;
-    paymentBody['stripeToken'] = token.id;
-    paymentBody['stripeTokenType'] = token.type;
-    paymentBody['stripeBillingName'] = addresses.billing_name || "";
-    paymentBody['stripeBillingAddressLine1'] = addresses.billing_address_line1 || "";
+    paymentBody['id'] = uuidv4();
+    paymentBody['amount'] = this.state.installment_amount;
+    paymentBody['paymentToken'] = token.id;
+    paymentBody['billingName'] = addresses.billing_name || "";
+    paymentBody['billingAddress'] = addresses.billing_address_line1 || "";
+    paymentBody['userID'] = userID;
+    paymentBody['time'] = new Date(Date.now());
     
-    console.log('paymentBody', paymentBody)
     fetch("http://localhost:3001/payments", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
@@ -53,19 +53,17 @@ class Checkout extends Component {
       mode: "cors"
     })
     .then(res => {
-      console.log('payment response:');
-      console.log(res)
       return res.json();
     })
     .then(result => {
-      console.log("payment result:")
+      console.log("All currently logged payments:")
       console.log(result)
 
       let subscriberBody = {};
       
       let date = new Date(Date.now());
 
-      subscriberBody['id'] = uuidv4();
+      subscriberBody['id'] = userID;
       subscriberBody['name'] = addresses['billing_name'];
       subscriberBody['currency'] = this.state.currency;
       subscriberBody['amountLeft'] = this.state.full_amount - this.state.installment_amount;
@@ -75,8 +73,6 @@ class Checkout extends Component {
         addresses.billing_address_zip + ", " + 
         addresses.billing_address_country_code
 
-      console.log('subscriberbody: ', subscriberBody);
-
       fetch("http://localhost:3001/subscribers", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -84,13 +80,14 @@ class Checkout extends Component {
         mode: "cors"
       })
       .then(res => {
-        console.log('subscriber response:');
-        console.log(res)
         return res.json();
       })
       .then(result => {
-        console.log('subscriber result:');
+        console.log('All currently subscribed users:');
         console.log(result)
+        this.setState({
+          payment_accepted : true
+        })
       })
       .catch(error => {
         console.log('error')
@@ -103,21 +100,47 @@ class Checkout extends Component {
     })
   };
 
-
   render() {
-    return (
-      <StripeCheckout
-        amount={this.state.installment_amount}
-        billingAddress
-        locale="auto"
-        name="Pay With Split"
-        stripeKey="pk_test_S6PzcbwueVbM4eIDKlQ5FK4200W95kYCLf"
-        token={this.onToken}
-        zipCode
-      />
-    )
+    if (!this.state.payment_accepted) {
+      return (
+        <div>
+          <div style={{
+            position: 'absolute', left: '50%', top: '50%',
+            transform: 'translate(-50%, -50%)',
+            border: '2px solid red', padding:'40px'
+          }}>
+            <b>Thank you for choosing to pay with Split!</b> <br/><br/>
+            <b>Total Payment:</b> 1000 SGD <br/>
+            <b>First Installment:</b> 100 SGD <br/>
+            <b>Payment Period:</b> 10 months <br/>
+          </div>
+          <div style={{
+            position: 'absolute', left: '50%', top: '50%',
+            transform: ' translate(0, 100%)'
+          }}>
+            <StripeCheckout
+              amount={this.state.installment_amount}
+              billingAddress
+              name="Pay With Split"
+              stripeKey="pk_test_S6PzcbwueVbM4eIDKlQ5FK4200W95kYCLf"
+              token={this.onToken}
+              zipCode
+            />
+          </div>
+        </div>
+      )
+    } else {
+      return (
+        <div style={{
+          position: 'absolute', left: '50%', top: '50%',
+          transform: 'translate(-50%, -50%)',
+          border: '2px solid red', padding:'40px'
+        }}>
+          <b>Thank you for paying with split!</b> <br/>
+        </div>
+      )
+    }
   }
-  
 }
 
 export default App;
