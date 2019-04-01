@@ -1,5 +1,5 @@
 # PayWithSplit
-Mock project for Split interview process.
+Mock project for Split interview process using React & NestJS.
 
 To set up dependencies:
 
