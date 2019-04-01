@@ -27,3 +27,8 @@ Mock card data can be for example:
 `CVV: 111`
 
 
+After starting the server, GET and POST endpoints can be reached at 
+`http:\\localhost:3001/payments` and `http:\\localhost:3001/subscribers` respectively.
+
+
+
