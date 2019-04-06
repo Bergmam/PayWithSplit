@@ -33,9 +33,6 @@ class App extends Component {
 }
 
 class MoveToNormalPayment extends Component {
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     return (
