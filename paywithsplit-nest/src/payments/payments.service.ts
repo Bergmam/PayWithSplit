@@ -14,11 +14,11 @@ export class PaymentsService {
     }
     
     getPaymentsByUserId(userId): Promise<any> {
-        let id = Number(userId)
+        //let id = Number(userId)
         let userPayments = []
         return new Promise(resolve => {
             this.payments.forEach(payment => {
-                if (payment.userId === id) userPayments.push(payment)
+                if (payment.userId === userId) userPayments.push(payment)
                 userPayments.push(payment)
             });
             resolve(userPayments);
@@ -34,12 +34,12 @@ export class PaymentsService {
         })
     }
 
-    deletePayment(payment): Promise<any>{
-        let id = Number(payment);
+    deletePayment(paymentTodelete): Promise<any>{
+        //let id = Number(payment);
         return new Promise(resolve => {
-            let index = this.payments.findIndex(payment => payment.id === id);
+            let index = this.payments.findIndex(payment => payment.id === paymentTodelete);
             if (index === -1){
-                throw new HttpException('No such payment', payment);
+                throw new HttpException('No such payment', paymentTodelete);
             }
             this.payments.splice(1, index);
             resolve(this.payments);

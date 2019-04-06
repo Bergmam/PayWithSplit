@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import StripeCheckout from 'react-stripe-checkout';
+import { BrowserRouter as Router, Link} from 'react-router-dom'
 const uuidv4 = require('uuid/v4')
 
 
@@ -19,8 +20,31 @@ class App extends Component {
   render() {
     return (
       <div>
-        <Checkout/>
+        <div>
+          <Checkout/>
+        </div>
+        <div>
+          <MoveToNormalPayment/>
+        </div>
       </div>
+      
+    )
+  }
+}
+
+class MoveToNormalPayment extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <Router>
+        <Link to={'/normalPayment/'}>
+          Click here to go to normal payment site.
+        </Link>
+      </Router>
+      
     )
   }
 }
@@ -29,10 +53,10 @@ class Checkout extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      full_amount: 10000,
-      installment_amount: 1000,
+      fullAmount: 10000,
+      installmentAmount: 1000,
       currency: "SGD",
-      payment_accepted : false
+      paymentAccepted : false
     }
   }
   onToken = (token, addresses) => {
@@ -66,7 +90,7 @@ class Checkout extends Component {
       subscriberBody['id'] = userID;
       subscriberBody['name'] = addresses['billing_name'];
       subscriberBody['currency'] = this.state.currency;
-      subscriberBody['amountLeft'] = this.state.full_amount - this.state.installment_amount;
+      subscriberBody['amountLeft'] = this.state.fullAmount - this.state.installment_amount;
       subscriberBody['nextPayment'] = date.setMonth(date.getMonth() + 1)
       subscriberBody['address'] = addresses.billing_address_line1 + " " + 
         addresses.billing_address_city + ", " + 
@@ -86,7 +110,7 @@ class Checkout extends Component {
         console.log('All currently subscribed users:');
         console.log(result)
         this.setState({
-          payment_accepted : true
+          paymentAccepted : true
         })
       })
       .catch(error => {
@@ -101,9 +125,23 @@ class Checkout extends Component {
   };
 
   render() {
-    if (!this.state.payment_accepted) {
+    if (!this.state.paymentAccepted) {
       return (
-        <div>
+        <CheckoutComponent onToken={this.onToken} installmentAmount={this.state.installmentAmount}/>
+      )
+    } else {
+      return (
+        <PaymentDoneComponent/>
+      )
+    }
+  }
+}
+
+class CheckoutComponent extends Component {
+
+  render() {
+    return (
+      <div>
           <div style={{
             position: 'absolute', left: '50%', top: '50%',
             transform: 'translate(-50%, -50%)',
@@ -119,27 +157,31 @@ class Checkout extends Component {
             transform: ' translate(0, 100%)'
           }}>
             <StripeCheckout
-              amount={this.state.installment_amount}
+              amount={this.props.installmentAmount}
               billingAddress
               name="Pay With Split"
               stripeKey="pk_test_S6PzcbwueVbM4eIDKlQ5FK4200W95kYCLf"
-              token={this.onToken}
+              token={this.props.onToken}
               zipCode
             />
           </div>
-        </div>
-      )
-    } else {
-      return (
-        <div style={{
-          position: 'absolute', left: '50%', top: '50%',
-          transform: 'translate(-50%, -50%)',
-          border: '2px solid red', padding:'40px'
-        }}>
-          <b>Thank you for paying with split!</b> <br/>
-        </div>
-      )
-    }
+        </div> 
+    )
+  }
+}
+
+class PaymentDoneComponent extends Component {
+
+  render() {
+    return (
+      <div style={{
+        position: 'absolute', left: '50%', top: '50%',
+        transform: 'translate(-50%, -50%)',
+        border: '2px solid red', padding:'40px'
+      }}>
+        <b>Thank you for paying with split!</b> <br/>
+      </div>
+    )
   }
 }
 

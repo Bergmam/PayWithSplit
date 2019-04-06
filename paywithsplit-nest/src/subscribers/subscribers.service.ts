@@ -16,7 +16,7 @@ export class SubscribersService {
         return new Promise(resolve => {
             const subscriber = this.subscribers.find(subscriber => subscriber.id === userId);
               if (!subscriber) {
-                  throw new HttpException('Book does not exist!', 404);
+                  throw new HttpException('Subscriber does not exist!', 404);
               }
               resolve(subscriber);
         })
