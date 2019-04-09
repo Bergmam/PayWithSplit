@@ -5,5 +5,7 @@ export class CreatePaymentDTO {
     paymentToken: string;
     billingName: string;
     billingAddress: string;
+    billingZip: string;
+    billingCity: string;
     time: number;
 }

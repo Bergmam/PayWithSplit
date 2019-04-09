@@ -14,7 +14,6 @@ export class PaymentsService {
     }
     
     getPaymentsByUserId(userId): Promise<any> {
-        //let id = Number(userId)
         let userPayments = []
         return new Promise(resolve => {
             this.payments.forEach(payment => {

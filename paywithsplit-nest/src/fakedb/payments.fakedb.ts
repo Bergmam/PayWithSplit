@@ -8,3 +8,5 @@ export const PAYMENTS = [
     { id: "a891d7c9-61fc-4c48-9339-4c6d50883051", userId: "63be3fb9-4c66-4ddc-aff0-3eb6daf7f9b3'", amount: 200, paymentToken: "tok_1EKVq5BuC5DEAKQrC4", currency: 'SGD', time: 1553619985},
     { id: "a51f00a7-b303-496a-9df7-9cb258b1fc4b", userId: "63be3fb9-4c66-4ddc-aff0-3eb6daf7f9b3'", amount: 200, paymentToken: "tok_1EKVq5BuC5DEAKQrC4", currency: 'SGD', time: 1553619985},
 ]
+
+export const OUTGOING_PAYMENTS = []

@@ -22,6 +22,8 @@ class SplitCheckout extends Component {
         paymentBody['paymentToken'] = token.id;
         paymentBody['billingName'] = addresses.billing_name || "";
         paymentBody['billingAddress'] = addresses.billing_address_line1 || "";
+        paymentBody['billingZip'] = addresses.billing_address_zip || "";
+        paymentBody['billingCity'] = addresses.billing_address_city || "";
         paymentBody['userID'] = userID;
         paymentBody['time'] = new Date(Date.now());
         
@@ -69,12 +71,10 @@ class SplitCheckout extends Component {
             })
         })
         .catch(error => {
-            console.log('error')
             console.error(error, "error in received subscriber response!")
         })
         })
         .catch(error => {
-        console.log('error')
         console.error(error, "error in received payment response!")
         })
     };
